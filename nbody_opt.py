@@ -13,6 +13,8 @@ Created on Wed Feb 20 00:10:51 2019
     Task 4: Using data aggregation to reduce loop overheads
     Original run time: --- 136.608999968 seconds ---
     Updated  run time: --- 82.1860001087 seconds ---
+    Updated2 run time (without np): --- 30.61107563972473 seconds ---
+    Updated2 run time (with np): --- 68.76928663253784 seconds ---
     Relative speed up: 1.66X (136.609/82.186)
 """
 # CHANGE: Task 3
@@ -21,17 +23,21 @@ def advance(dt, BODIES, bodies_combi):
         advance the system one timestep
     '''
     # CHANGE: Task 4
-    for body in bodies_combi: 
-        ([x1, y1, z1], v1, m1) = BODIES[body[0]]
-        ([x2, y2, z2], v2, m2) = BODIES[body[1]]
+    for (b1,b2) in bodies_combi: 
+        ([x1, y1, z1], v1, m1) = BODIES[b1]
+        ([x2, y2, z2], v2, m2) = BODIES[b2]
         # CHANGE: Task 1
         (dx, dy, dz) = (x1-x2, y1-y2, z1-z2) 
-        v1[0] -= dx * m2 * dt * ((dx * dx + dy * dy + dz * dz) ** (-1.5))
-        v1[1] -= dy * m2 * dt * ((dx * dx + dy * dy + dz * dz) ** (-1.5))
-        v1[2] -= dz * m2 * dt * ((dx * dx + dy * dy + dz * dz) ** (-1.5))
-        v2[0] += dx * m1 * dt * ((dx * dx + dy * dy + dz * dz) ** (-1.5))
-        v2[1] += dy * m1 * dt * ((dx * dx + dy * dy + dz * dz) ** (-1.5))
-        v2[2] += dz * m1 * dt * ((dx * dx + dy * dy + dz * dz) ** (-1.5))
+        # CHANGE (20180307): reduce calculations
+        common_factor = dt * ((dx * dx + dy * dy + dz * dz) ** (-1.5))
+        common_factor_v1 = common_factor * m2
+        common_factor_v2 = common_factor * m1
+        v1[0] -= dx * common_factor_v1
+        v1[1] -= dy * common_factor_v1
+        v1[2] -= dz * common_factor_v1
+        v2[0] += dx * common_factor_v2
+        v2[1] += dy * common_factor_v2
+        v2[2] += dz * common_factor_v2   
         
     for body in BODIES.keys():
         (r, [vx, vy, vz], m) = BODIES[body] 
@@ -46,11 +52,11 @@ def report_energy(BODIES, bodies_combi, e=0.0):
         compute the energy and return it so that it can be printed
     '''
     # CHANGE: Task 4
-    for body in bodies_combi:
-        ([x1, y1, z1], v1, m1) = BODIES[body[0]]
-        ([x2, y2, z2], v2, m2) = BODIES[body[1]]
+    for (b1,b2) in bodies_combi:
+        ([x1, y1, z1], v1, m1) = BODIES[b1]
+        ([x2, y2, z2], v2, m2) = BODIES[b2]
         # CHANGE: Task 1
-        (dx, dy, dz) = (x1-x2, y1-y2, z1-z2)    
+        (dx, dy, dz) = (x1-x2, y1-y2, z1-z2)
         e -= (m1 * m2) / ((dx * dx + dy * dy + dz * dz) ** 0.5) 
         
     for body in BODIES.keys():
@@ -96,6 +102,7 @@ def nbody(loops, reference, iterations, BODIES, bodies_combi):
 
 import time
 import itertools
+import numpy as np
 if __name__ == '__main__':
     
     # CHANGE: Task 3
