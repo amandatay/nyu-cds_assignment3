@@ -15,7 +15,8 @@ Created on Wed Feb 20 00:10:51 2019
     Updated  run time: --- 82.1860001087 seconds ---
     Updated2 run time (without np): --- 30.61107563972473 seconds ---
     Updated2 run time (with np): --- 68.76928663253784 seconds ---
-    Relative speed up: 1.66X (136.609/82.186)
+    Relative speed up: 4.46X (136.609/30.611)
+    
 """
 # CHANGE: Task 3
 def advance(dt, BODIES, bodies_combi):
